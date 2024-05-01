@@ -1,2 +1,2 @@
 # DiscordBot
-Bot for xKiichan's discord server
+Bot for a discord server
