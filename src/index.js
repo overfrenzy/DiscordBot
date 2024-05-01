@@ -28,4 +28,16 @@ client.on("ready", (c) => {
   }
 }); */
 
+client.on("interactionCreate", (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  //console.log(interaction.commandName);
+  if (interaction.commandName === "hey") {
+    interaction.reply("hey");
+  }
+  if (interaction.commandName === "marko") {
+    interaction.reply("polo");
+  }
+});
+
 client.login(process.env.TOKEN);
