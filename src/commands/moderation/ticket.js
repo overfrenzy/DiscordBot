@@ -3,10 +3,14 @@ const {
   EmbedBuilder,
   PermissionsBitField,
   ActionRowBuilder,
-  StringSelectMenuBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   ChannelType,
 } = require('discord.js');
 const ticket = require('../../schemas/ticketSchema');
+require('dotenv').config();
+
+const allowedUserIds = process.env.ALLOWED_USER_IDS.split(',');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,7 +23,7 @@ module.exports = {
         .addStringOption((option) =>
           option
             .setName('name')
-            .setDescription('The name for the open select menu content')
+            .setDescription('The name for the button')
             .setRequired(true)
         )
         .addStringOption((option) =>
@@ -48,6 +52,15 @@ module.exports = {
   async execute(interaction) {
     const { options } = interaction;
     const sub = options.getSubcommand();
+
+    // Check if the user is allowed to use this command
+    if (!allowedUserIds.includes(interaction.user.id)) {
+      return await interaction.reply({
+        content: 'You do not have permission to use this command.',
+        ephemeral: true,
+      });
+    }
+
     const data = await ticket.findOne({ Guild: interaction.guild.id });
 
     switch (sub) {
@@ -62,49 +75,31 @@ module.exports = {
         const name = options.getString('name');
         const message =
           options.getString('message') ||
-          'Create a ticket to talk with the server staff! Once you select below, use the input to describe why you are creating this ticket';
+          'Create a ticket to talk with the server staff! Click the button below to start the process.';
 
-        const select = new ActionRowBuilder().addComponents(
-          new StringSelectMenuBuilder()
-            .setCustomId('ticketCreateSelect')
-            .setPlaceholder(`😡 ${name}`)
-            .setMinValues(1)
-            .setMaxValues(1)
-            .addOptions([
-              {
-                label: 'Create your ticket',
-                description: 'Click to begin the ticket creation process',
-                value: 'createTicket',
-              },
-            ])
+        const button = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('ticketCreateButton')
+            .setLabel(`🗣️ snitch`)
+            .setStyle(ButtonStyle.Secondary)
         );
 
         const embed = new EmbedBuilder()
-          .setColor('Blurple')
+          .setColor('Red')
           .setTitle('💀 Create a ticket!')
-          .setDescription(message + ' 🫡')
+          .setDescription(message)
           .setFooter({
             text: `${interaction.guild.name}`,
             iconURL: `${interaction.guild.iconURL()}`,
           });
 
-        const ticketMessage = await interaction.reply({
+        await interaction.reply({
           content: '🗣️ I have sent your ticket message below.',
           ephemeral: true,
         });
-        const sentMessage = await interaction.channel.send({
+        await interaction.channel.send({
           embeds: [embed],
-          components: [select],
-        });
-
-        // Add a listener for the ticket creation interaction to disable the button
-        client.on('interactionCreate', async (interaction) => {
-          if (interaction.customId === 'ticketCreateSelect') {
-            const message = await interaction.channel.messages.fetch(sentMessage.id);
-            const row = message.components[0];
-            row.components[0].setDisabled(true);
-            await message.edit({ components: [row] });
-          }
+          components: [button],
         });
 
         break;

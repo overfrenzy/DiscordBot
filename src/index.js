@@ -18,8 +18,11 @@ client.once("ready", () => {
 
   // Function to update status based on current time in GMT+2
   const updateStatus = () => {
-    const currentTime = DateTime.now().setZone("GMT+2");
+    const currentTime = DateTime.now().setZone("Europe/Berlin"); // GMT+2 during Daylight Saving Time (DST)
     const currentHour = currentTime.hour;
+
+    console.log(`Current time in GMT+2: ${currentTime.toISO()}`);
+    console.log(`Current hour in GMT+2: ${currentHour}`);
 
     if (currentHour >= 20 || currentHour < 0) {
       // 20:00 (8 PM) to 00:00 (12 AM) GMT+2
@@ -27,12 +30,14 @@ client.once("ready", () => {
         activities: [{ name: "Vedal987", type: "WATCHING" }],
         status: "online",
       });
+      console.log("Set status to WATCHING Vedal987");
     } else {
       // All other times
       client.user.setPresence({
         activities: [{ name: "Rachie", type: "LISTENING" }],
         status: "online",
       });
+      console.log("Set status to LISTENING Rachie");
     }
   };
 
