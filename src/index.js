@@ -1,5 +1,7 @@
-require("dotenv").config();
-const { Client, IntentsBitField } = require("discord.js");
+require('dotenv').config();
+const { Client, IntentsBitField } = require('discord.js');
+const mongoose = require('mongoose');
+const eventHandler = require('./handlers/eventHandler');
 
 const client = new Client({
   intents: [
@@ -10,34 +12,16 @@ const client = new Client({
   ],
 });
 
-client.on("ready", (c) => {
-  console.log(`${c.user.username} is online ✅`);
-});
+(async () => {
+  try {
+    mongoose.set('strictQuery', false);
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('Connected to DB.');
 
-/*client.on('messageCreate', (message) => {
-    console.log(message.content); //log message
-}) */
-
-/*client.on("messageCreate", (message) => {
-  if (message.author.bot) {
-    //makes it so bot doesn't reply to bots
-    return;
+    eventHandler(client);
+  } catch (error) {
+    console.log(`Error: ${error}`);
   }
-  if (message.content === "hey") {
-    message.reply("hey"); //if it finds a it replies b
-  }
-}); */
-
-client.on("interactionCreate", (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-
-  //console.log(interaction.commandName);
-  if (interaction.commandName === "hey") {
-    interaction.reply("hey");
-  }
-  if (interaction.commandName === "marko") {
-    interaction.reply("polo");
-  }
-});
+})();
 
 client.login(process.env.TOKEN);
