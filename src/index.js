@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Client, IntentsBitField } = require("discord.js");
+const { Client, IntentsBitField, ActivityType } = require("discord.js");
 const mongoose = require("mongoose");
 const eventHandler = require("./handlers/eventHandler");
 const { DateTime } = require("luxon");
@@ -27,14 +27,14 @@ client.once("ready", () => {
     if (currentHour >= 20 || currentHour < 0) {
       // 20:00 (8 PM) to 00:00 (12 AM) GMT+2
       client.user.setPresence({
-        activities: [{ name: "Vedal987", type: "WATCHING" }],
+        activities: [{ name: "Vedal987", type: ActivityType.Watching }],
         status: "online",
       });
       console.log("Set status to WATCHING Vedal987");
     } else {
       // All other times
       client.user.setPresence({
-        activities: [{ name: "Rachie", type: "LISTENING" }],
+        activities: [{ name: "Rachie", type: ActivityType.Listening }],
         status: "online",
       });
       console.log("Set status to LISTENING Rachie");

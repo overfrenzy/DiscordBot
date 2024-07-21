@@ -30,8 +30,8 @@ module.exports = {
       const info = new TextInputBuilder()
         .setCustomId('infoTicket')
         .setRequired(false)
-        .setPlaceholder('Feel free to leave this blank')
-        .setLabel('Provide us with any additional information')
+        .setPlaceholder('Feel free to leave this blank.\nYou can include screenshots after filling this form.')
+        .setLabel('Additional Information')
         .setStyle(TextInputStyle.Paragraph);
 
       const one = new ActionRowBuilder().addComponents(why);
@@ -42,6 +42,7 @@ module.exports = {
     } else if (interaction.customId === 'ticketModal') {
       const user = interaction.user;
       const data = await ticket.findOne({ Guild: interaction.guild.id });
+
       if (!data) {
         return await interaction.reply({
           content: 'Sorry! Looks like you found this message but the ticket system is not yet setup here',
@@ -59,7 +60,8 @@ module.exports = {
           });
         }
 
-        const existingChannel = interaction.guild.channels.cache.find(channel => channel.name === `ticket-${user.id}`);
+        const channelName = `ticket-${user.username}`;
+        const existingChannel = interaction.guild.channels.cache.find(channel => channel.name === channelName);
         if (existingChannel) {
           return await interaction.reply({
             content: `You already have an open ticket: ${existingChannel}. Please close it before creating a new one.`,
@@ -69,7 +71,7 @@ module.exports = {
 
         try {
           const channel = await interaction.guild.channels.create({
-            name: `ticket-${user.id}`,
+            name: channelName,
             type: ChannelType.GuildText,
             topic: `Ticket User: ${user.username}; Ticket reason: ${why}`,
             parent: category.id,
@@ -87,7 +89,7 @@ module.exports = {
                 ],
               },
               {
-                id: process.env.CLIENT_ID,
+                id: client.user.id,
                 allow: [
                   PermissionsBitField.Flags.ViewChannel,
                   PermissionsBitField.Flags.SendMessages,
@@ -95,7 +97,15 @@ module.exports = {
                   PermissionsBitField.Flags.EmbedLinks,
                   PermissionsBitField.Flags.AttachFiles,
                 ],
-              }
+              },
+              {
+                id: process.env.MODERATOR_ROLE_ID,
+                allow: [
+                  PermissionsBitField.Flags.ViewChannel,
+                  PermissionsBitField.Flags.SendMessages,
+                  PermissionsBitField.Flags.ReadMessageHistory,
+                ],
+              },
             ],
           });
 
@@ -112,7 +122,9 @@ module.exports = {
               .setStyle(ButtonStyle.Danger)
           );
 
+          await channel.send(`<@&${process.env.MODERATOR_ROLE_ID}>`);
           await channel.send({ embeds: [embed], components: [button] });
+
           await interaction.reply({
             content: `💼 Your ticket has been opened in ${channel}`,
             ephemeral: true,
@@ -144,7 +156,17 @@ module.exports = {
     } else if (interaction.customId === 'closeTicketModal') {
       const channel = interaction.channel;
       const name = channel.name.replace('ticket-', '');
-      const member = await interaction.guild.members.cache.get(name);
+      console.log('Closing ticket for:', name); // Debugging line
+
+      const member = interaction.guild.members.cache.find(member => member.user.username === name);
+
+      if (!member) {
+        console.error(`Member not found for name: ${name}`);
+        return await interaction.reply({
+          content: 'An error occurred while closing the ticket. Member not found.',
+          ephemeral: true,
+        });
+      }
 
       const reason = interaction.fields.getTextInputValue('closeReasonTicket');
       await interaction.reply({ content: '🔒 Closing this ticket...' });
