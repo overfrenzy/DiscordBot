@@ -1,16 +1,16 @@
+const { SlashCommandBuilder } = require('discord.js');
+
 module.exports = {
-    name: 'ping',
-    description: 'Replies with the bot ping!',
-  
-    callback: async (client, interaction) => {
-      await interaction.deferReply();
-  
-      const reply = await interaction.fetchReply();
-  
-      const ping = reply.createdTimestamp - interaction.createdTimestamp;
-  
-      interaction.editReply(
-        `the ping is ${ping}ms | Websocket: ${client.ws.ping}ms`
-      );
-    },
-  };
+  data: new SlashCommandBuilder()
+    .setName('ping')
+    .setDescription('Replies with the bot ping!'),
+
+  async execute(interaction) {
+    await interaction.deferReply();
+
+    const reply = await interaction.fetchReply();
+    const ping = reply.createdTimestamp - interaction.createdTimestamp;
+
+    interaction.editReply(`the ping is ${ping}ms | Websocket: ${interaction.client.ws.ping}ms`);
+  },
+};
