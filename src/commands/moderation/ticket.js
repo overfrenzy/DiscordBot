@@ -1,13 +1,16 @@
 const {
   SlashCommandBuilder,
-  EmbedBuilder,
   PermissionsBitField,
+  ChannelType,
+  EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  ChannelType,
 } = require("discord.js");
 const ticket = require("../../schemas/ticketSchema");
+require("dotenv").config();
+
+const ALLOWED_USER_IDS = process.env.ALLOWED_USER_IDS.split(",");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -47,6 +50,13 @@ module.exports = {
     )
     .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator),
   async execute(interaction) {
+    if (!ALLOWED_USER_IDS.includes(interaction.user.id)) {
+      return interaction.reply({
+        content: "You do not have permission to use this command.",
+        ephemeral: true,
+      });
+    }
+
     const { options } = interaction;
     const sub = options.getSubcommand();
     const data = await ticket.findOne({ Guild: interaction.guild.id });
@@ -64,12 +74,12 @@ module.exports = {
         const name = options.getString("name");
         const message =
           options.getString("message") ||
-          "Submit your query by clicking the button below.\nA FrenzyCorp:tm: representative will assist you shortly.\n\nPlease keep tickets related to RinaSunSun server";
+          "Submit your query by clicking the button below.\nA FrenzyCorp™ representative will assist you shortly.\n\nPlease keep tickets related to RinaSunSun server";
 
         const button = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setCustomId("ticketCreateButton")
-            .setLabel(`snitch`)
+            .setLabel("Create Ticket")
             .setStyle(ButtonStyle.Secondary)
             .setEmoji({ id: "1238463950501449728", name: "jail" })
         );
