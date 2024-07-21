@@ -1,5 +1,8 @@
 require("dotenv").config();
-const { Client, IntentsBitField } = require("discord.js");
+const { Client, IntentsBitField, ActivityType } = require("discord.js");
+const mongoose = require("mongoose");
+const eventHandler = require("./handlers/eventHandler");
+const { DateTime } = require("luxon");
 
 const client = new Client({
   intents: [
@@ -10,22 +13,53 @@ const client = new Client({
   ],
 });
 
-client.on("ready", (c) => {
-  console.log(`${c.user.username} is online ✅`);
+client.once("ready", () => {
+  console.log(`Logged in as ${client.user.tag}`);
+
+  // Function to update status based on current time in GMT+2
+  const updateStatus = () => {
+    const currentTime = DateTime.now().setZone("Europe/Berlin"); // GMT+2 during Daylight Saving Time (DST)
+    const currentHour = currentTime.hour;
+
+    console.log(`Current time in GMT+2: ${currentTime.toISO()}`);
+    console.log(`Current hour in GMT+2: ${currentHour}`);
+
+    if (currentHour >= 20 || currentHour < 0) {
+      // 20:00 (8 PM) to 00:00 (12 AM) GMT+2
+      client.user.setPresence({
+        activities: [{ name: "Vedal987", type: ActivityType.Watching }],
+        status: "online",
+      });
+      console.log("Set status to WATCHING Vedal987");
+    } else {
+      // All other times
+      client.user.setPresence({
+        activities: [{ name: "Rachie", type: ActivityType.Listening }],
+        status: "online",
+      });
+      console.log("Set status to LISTENING Rachie");
+    }
+  };
+
+  // Update status immediately on bot start
+  updateStatus();
+
+  // Update status every hour
+  setInterval(updateStatus, 60 * 60 * 1000);
+
+  console.log("Custom status set based on time.");
 });
 
-/*client.on('messageCreate', (message) => {
-    console.log(message.content); //log message
-}) */
+(async () => {
+  try {
+    mongoose.set("strictQuery", false);
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected to DB.");
 
-/*client.on("messageCreate", (message) => {
-  if (message.author.bot) {
-    //makes it so bot doesn't reply to bots
-    return;
+    eventHandler(client);
+  } catch (error) {
+    console.log(`Error: ${error}`);
   }
-  if (message.content === "hey") {
-    message.reply("hey"); //if it finds a it replies b
-  }
-}); */
+})();
 
 client.login(process.env.TOKEN);
