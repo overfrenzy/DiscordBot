@@ -169,13 +169,28 @@ module.exports = {
       }
 
       const reason = interaction.fields.getTextInputValue('closeReasonTicket');
+
+      const messages = [
+        `Dear ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed for the following reason: \`${reason}\`. \nWe appreciate your cooperation.\n\nSincerely,\nFrenzyCorp™ Team`,
+        `Hello ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed due to: \`${reason}\`. \nThank you for your understanding.\n\nBest regards,\nFrenzyCorp™ Team`,
+        `Hi ${member.user.username},\n\nThis is to inform you that your ticket in ${interaction.guild.name} has been closed for: \`${reason}\`. \nWe thank you for adhering to our guidelines.\n\nSincerely,\nFrenzyCorp™ Team`,
+        `Greetings ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed with the reason: \`${reason}\`. \nWe appreciate your patience and understanding.\n\nRegards,\nFrenzyCorp™ Team`,
+        `Dear ${member.user.username},\n\nPlease be informed that your ticket in ${interaction.guild.name} has been closed for: \`${reason}\`. \nThank you for your cooperation.\n\nBest,\nFrenzyCorp™ Team`,
+        `Hello ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed due to: \`${reason}\`. \nWe appreciate your compliance.\n\nBest,\nFrenzyCorp™ Team`
+      ];
+
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
       await interaction.reply({ content: '🔒 Closing this ticket...' });
 
       setTimeout(async () => {
         await channel.delete().catch((err) => {});
-        await member
-          .send(`oh hi! your ticket in ${interaction.guild.name} has been closed for: \`${reason}\``)
-          .catch((err) => {});
+        const closeEmbed = new EmbedBuilder()
+          .setColor('Blue')
+          .setTitle('Ticket Closed')
+          .setDescription(randomMessage)
+          .setTimestamp();
+        await member.send({ embeds: [closeEmbed] }).catch((err) => {});
       }, 5000);
     }
   },

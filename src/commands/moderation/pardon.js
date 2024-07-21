@@ -1,4 +1,8 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  EmbedBuilder,
+} = require("discord.js");
 const Warning = require("../../schemas/warningSchema");
 
 module.exports = {
@@ -29,6 +33,19 @@ module.exports = {
     }
 
     try {
+      const targetMember = await interaction.guild.members.fetch(target.id);
+      const botMember = await interaction.guild.members.fetch(
+        interaction.client.user.id
+      );
+
+      // Check if the bot has the required permissions
+      if (!botMember.permissions.has(PermissionFlagsBits.ModerateMembers)) {
+        return interaction.reply({
+          content: "I do not have permission to un-timeout members.",
+          ephemeral: true,
+        });
+      }
+
       const warningRecord = await Warning.findOne({
         userId: target.id,
         guildId: interaction.guild.id,
@@ -49,16 +66,21 @@ module.exports = {
 
       // Create an embed message for the pardon
       const pardonEmbed = new EmbedBuilder()
-        .setColor(0x00FF00) // Green
+        .setColor(0x00ff00) // Green
         .setTitle("Pardon Notice")
-        .setDescription(`**Dear ${target.username},**\n\nWe are pleased to inform you that your recent transgressions have been pardoned by **FrenzyCorp™**. Please continue to adhere to our community guidelines.\n\n**Thank you for your cooperation.**\n\n**Sincerely,**\n**The FrenzyCorp™ Team**`);
+        .setDescription(
+          `**Dear ${target.username},**\n\nWe are pleased to inform you that your recent transgressions have been pardoned by **FrenzyCorp™**. Please continue to adhere to our community guidelines.\n\n**Thank you for your cooperation.**\n\n**Sincerely,**\n**The FrenzyCorp™ Team**`
+        );
 
       // Send the pardon embed to the target member
-      await target.send({ embeds: [pardonEmbed] });
+      await targetMember.send({ embeds: [pardonEmbed] });
+
+      // Remove the timeout
+      await targetMember.timeout(null);
 
       // Send a confirmation message in the channel
       await interaction.reply({
-        content: `${target.tag}'s warnings have been reset and they have been notified of their pardon.`,
+        content: `${target.tag}'s warnings have been reset, their timeout has been lifted, and they have been notified of their pardon.`,
         ephemeral: true,
       });
     } catch (error) {
