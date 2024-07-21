@@ -9,8 +9,7 @@ const {
   ButtonStyle,
   PermissionsBitField,
 } = require("discord.js");
-const ticket = require("../../schemas/ticketSchema");
-const { createTranscript } = require("discord-html-transcripts");
+const ticket = require("../../schemas/ticketSchema"); // Adjusted import path
 
 module.exports = {
   name: "interactionCreate",
@@ -44,7 +43,8 @@ module.exports = {
       const data = await ticket.findOne({ Guild: interaction.guild.id });
       if (!data) {
         return await interaction.reply({
-          content: `Sorry! Looks like you found this message but the ticket system is not yet setup here`,
+          content:
+            "Sorry! Looks like you found this message but the ticket system is not yet setup here",
           ephemeral: true,
         });
       } else {
@@ -56,7 +56,8 @@ module.exports = {
 
         if (!category) {
           return await interaction.reply({
-            content: `Sorry! The ticket category is not found. Please set it up again.`,
+            content:
+              "Sorry! The ticket category is not found. Please set it up again.",
             ephemeral: true,
           });
         }
@@ -95,11 +96,7 @@ module.exports = {
             new ButtonBuilder()
               .setCustomId("closeTicket")
               .setLabel("🔒 Close Ticket")
-              .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-              .setCustomId("ticketTranscript")
-              .setLabel("📜 Transcript")
-              .setStyle(ButtonStyle.Primary)
+              .setStyle(ButtonStyle.Danger)
           );
 
           await channel.send({ embeds: [embed], components: [button] });
@@ -110,7 +107,8 @@ module.exports = {
         } catch (error) {
           console.error("Error creating ticket channel:", error);
           await interaction.reply({
-            content: `An error occurred while creating the ticket channel. Please try again later.`,
+            content:
+              "An error occurred while creating the ticket channel. Please try again later.",
             ephemeral: true,
           });
         }
@@ -137,32 +135,16 @@ module.exports = {
       const member = await interaction.guild.members.cache.get(name);
 
       const reason = interaction.fields.getTextInputValue("closeReasonTicket");
-      await interaction.reply({ content: `🔒 Closing this ticket...` });
+      await interaction.reply({ content: "🔒 Closing this ticket..." });
 
       setTimeout(async () => {
         await channel.delete().catch((err) => {});
         await member
           .send(
-            `🗣️ You are receiving this notification because your ticket in ${interaction.guild.name} has been closed for: \`${reason}\``
+            `oh hi! your ticket in ${interaction.guild.name} has been closed for: \`${reason}\``
           )
           .catch((err) => {});
       }, 5000);
-    } else if (interaction.customId === "ticketTranscript") {
-      const file = await createTranscript(interaction.channel, {
-        limit: -1,
-        returnBuffer: false,
-        filename: `${interaction.channel.name}.html`,
-      });
-
-      const msg = await interaction.channel.send({
-        content: `🫡 Your transcript cache:`,
-        files: [file],
-      });
-      const message = `📜 **Here is your [ticket transcript](https://mahto.id/chat-exporter?url=${
-        msg.attachments.first()?.url
-      }) from ${interaction.guild.name}!**`;
-      await msg.delete().catch((err) => {});
-      await interaction.reply({ content: message, ephemeral: true });
     }
   },
 };
