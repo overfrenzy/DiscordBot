@@ -1,2 +1,2 @@
 # DiscordBot
-Discord bot for moderating, including ticket system for members to staff communication
+Discord bot for moderating, including a ticket system for members to staff communication
