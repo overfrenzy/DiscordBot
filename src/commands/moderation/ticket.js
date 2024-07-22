@@ -10,7 +10,7 @@ const {
 const ticket = require("../../schemas/ticketSchema");
 require("dotenv").config();
 
-const ALLOWED_USER_IDS = process.env.ALLOWED_USER_IDS.split(",");
+const ALLOWED_USER_IDS = process.env.ALLOWED_USER_IDS.split(","); //allow only ALLOWED users use ticket commands
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -74,7 +74,7 @@ module.exports = {
         const name = options.getString("name");
         const message =
           options.getString("message") ||
-          "Submit your query by clicking the button below.\nA FrenzyCorp™ representative will assist you shortly.\n\nPlease keep tickets related to RinaSunSun server";
+          "Submit your query by clicking the button below\nA FrenzyCorp™ representative will assist you shortly\n\nPlease keep tickets related to RinaSunSun server";
 
         const button = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
@@ -86,7 +86,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
           .setColor("Red")
-          .setTitle("💀 Create a ticket!")
+          .setTitle("Create a ticket! <:Corpa:1264694947370631219>")
           .setDescription(message)
           .setFooter({
             text: `${interaction.guild.name}`,
