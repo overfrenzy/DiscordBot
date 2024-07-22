@@ -64,7 +64,7 @@ module.exports = {
         const existingChannel = interaction.guild.channels.cache.find(channel => channel.name === channelName);
         if (existingChannel) {
           return await interaction.reply({
-            content: `You already have an open ticket: ${existingChannel}. Please close it before creating a new one.`,
+            content: `You already have an open ticket: ${existingChannel} <:nonono:1264702387004772483> Please close it before creating a new one \n<:ok:1264702580630487041>`,
             ephemeral: true,
           });
         }
@@ -126,13 +126,13 @@ module.exports = {
           await channel.send({ embeds: [embed], components: [button] });
 
           await interaction.reply({
-            content: `💼 Your ticket has been opened in ${channel}`,
+            content: `💼 Your ticket has been opened in ${channel} <:LETHIMCOOK:1264702588922757210>`,
             ephemeral: true,
           });
         } catch (error) {
           console.error('Error creating ticket channel:', error);
           await interaction.reply({
-            content: 'An error occurred while creating the ticket channel. Please try again later.',
+            content: 'An error occurred while creating the ticket channel. Please try again later <a:NOOOO:1264703017752723539>',
             ephemeral: true,
           });
         }
@@ -171,12 +171,12 @@ module.exports = {
       const reason = interaction.fields.getTextInputValue('closeReasonTicket');
 
       const messages = [
-        `Dear ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed for the following reason: \`${reason}\`. \nWe appreciate your cooperation.\n\nSincerely,\nFrenzyCorp™ Team`,
-        `Hello ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed due to: \`${reason}\`. \nThank you for your understanding.\n\nBest regards,\nFrenzyCorp™ Team`,
-        `Hi ${member.user.username},\n\nThis is to inform you that your ticket in ${interaction.guild.name} has been closed for: \`${reason}\`. \nWe thank you for adhering to our guidelines.\n\nSincerely,\nFrenzyCorp™ Team`,
-        `Greetings ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed with the reason: \`${reason}\`. \nWe appreciate your patience and understanding.\n\nRegards,\nFrenzyCorp™ Team`,
-        `Dear ${member.user.username},\n\nPlease be informed that your ticket in ${interaction.guild.name} has been closed for: \`${reason}\`. \nThank you for your cooperation.\n\nBest,\nFrenzyCorp™ Team`,
-        `Hello ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed due to: \`${reason}\`. \nWe appreciate your compliance.\n\nBest,\nFrenzyCorp™ Team`
+        `Dear ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed for the following reason: \`${reason}\`. \nWe appreciate your cooperation.\n\nSincerely,\nFrenzyCorp™\n<:Corpa:1264694947370631219> <a:Clap:1264695669239578636>`,
+        `Hello ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed due to: \`${reason}\`. \nThank you for your understanding.\n\nBest regards,\nFrenzyCorp™\n<:Corpa:1264694947370631219> <a:Clap:1264695669239578636>`,
+        `Hi ${member.user.username},\n\nThis is to inform you that your ticket in ${interaction.guild.name} has been closed for: \`${reason}\`. \nWe thank you for adhering to our guidelines.\n\nSincerely,\nFrenzyCorp™\n<:Corpa:1264694947370631219> <a:Clap:1264695669239578636>`,
+        `Greetings ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed with the reason: \`${reason}\`. \nWe appreciate your patience and understanding.\n\nRegards,\nFrenzyCorp™\n<:Corpa:1264694947370631219> <a:Clap:1264695669239578636>`,
+        `Dear ${member.user.username},\n\nPlease be informed that your ticket in ${interaction.guild.name} has been closed for: \`${reason}\`. \nThank you for your cooperation.\n\nBest,\nFrenzyCorp™\n<:Corpa:1264694947370631219> <a:Clap:1264695669239578636>`,
+        `Hello ${member.user.username},\n\nYour ticket in ${interaction.guild.name} has been closed due to: \`${reason}\`. \nWe appreciate your compliance.\n\nBest,\nFrenzyCorp™\n<:Corpa:1264694947370631219> <a:Clap:1264695669239578636>`
       ];
 
       const randomMessage = messages[Math.floor(Math.random() * messages.length)];

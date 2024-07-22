@@ -1,53 +1,69 @@
-const { REST, Routes } = require("discord.js");
-const fs = require("fs");
-const path = require("path");
-require("dotenv").config();
+const { REST, Routes, PermissionFlagsBits } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
 
-const { CLIENT_ID, GUILD_ID, TOKEN, MODERATOR_ROLE_ID, ALLOWED_USER_IDS } =
-  process.env;
+const { CLIENT_ID, GUILD_ID, TOKEN } = process.env;
 
 const commands = [];
-const commandFolders = fs.readdirSync(path.join(__dirname, "commands"));
+const commandFolders = fs.readdirSync(path.join(__dirname, 'commands')).filter(file => !file.startsWith('.'));
 
-for (const folder of commandFolders) {
-  const commandFiles = fs
-    .readdirSync(path.join(__dirname, "commands", folder))
-    .filter((file) => file.endsWith(".js"));
-  for (const file of commandFiles) {
-    const command = require(`./commands/${folder}/${file}`);
-    if (!command.data) {
-      console.error(`Command data is missing in file: ${folder}/${file}`);
-      continue;
+// Function to get all command files from directories
+function getCommandFiles(dir) {
+  let commandFiles = [];
+  const files = fs.readdirSync(dir);
+
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    if (fs.statSync(filePath).isDirectory()) {
+      commandFiles = commandFiles.concat(getCommandFiles(filePath));
+    } else if (file.endsWith('.js')) {
+      commandFiles.push(filePath);
     }
+  }
+
+  return commandFiles;
+}
+
+// Get all command files from the commands directory
+const commandFiles = getCommandFiles(path.join(__dirname, 'commands'));
+
+// Load command data from files
+for (const file of commandFiles) {
+  const command = require(file);
+  if (command.data) {
     const commandData = command.data.toJSON();
 
-    // Check if the command is restricted to certain users
+    // Set default permissions for commands
     if (["warn", "pardon"].includes(commandData.name)) {
-      commandData.default_member_permissions = `0`;
+      commandData.default_member_permissions = PermissionFlagsBits.ManageMessages.toString();
       commandData.dm_permission = false;
     }
 
-    // ticket commands restricted to specific users
-    if (commandData.name === "ticket") {
-      commandData.default_member_permissions = `0`;
+    if (["send", "setup", "remove"].includes(commandData.name)) {
+      commandData.default_member_permissions = PermissionFlagsBits.ManageGuild.toString();
       commandData.dm_permission = false;
     }
 
     commands.push(commandData);
+  } else {
+    console.error(`Command data is missing in file: ${file}`);
   }
 }
 
-const rest = new REST({ version: "10" }).setToken(TOKEN);
+const rest = new REST({ version: '10' }).setToken(TOKEN);
 
 (async () => {
   try {
-    console.log("Started refreshing application (/) commands.");
+    console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
-      body: commands,
-    });
+    // Register commands
+    await rest.put(
+      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+      { body: commands },
+    );
 
-    console.log("Successfully reloaded application (/) commands.");
+    console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
   }

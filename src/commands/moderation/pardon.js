@@ -19,7 +19,7 @@ module.exports = {
 
   async execute(interaction) {
     const target = interaction.options.getUser("target");
-    const MODERATOR_ROLE_ID = process.env.MODERATOR_ROLE_ID;
+    const MODERATOR_ROLE_ID = process.env.MODERATOR_ROLE_ID; //allow only users with certain role use pardon command
 
     if (!interaction.member.roles.cache.has(MODERATOR_ROLE_ID)) {
       return interaction.reply({
@@ -69,7 +69,7 @@ module.exports = {
         .setColor(0x00ff00) // Green
         .setTitle("Pardon Notice")
         .setDescription(
-          `**Dear ${target.username},**\n\nWe are pleased to inform you that your recent transgressions have been pardoned by **FrenzyCorp™**. Please continue to adhere to our community guidelines.\n\n**Thank you for your cooperation.**\n\n**Sincerely,**\n**The FrenzyCorp™ Team**`
+          `**Dear ${target.username},**\n\nWe are pleased to inform you that your recent transgressions have been pardoned by **FrenzyCorp™**. Please continue to adhere to our community guidelines.\n\n**Thank you for your cooperation.**\n\n**Sincerely,**\n**The FrenzyCorp™ Team** \n<:Corpa:1264694947370631219> <a:Clap:1264695669239578636>`
         );
 
       // Send the pardon embed to the target member

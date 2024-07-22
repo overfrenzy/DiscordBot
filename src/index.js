@@ -24,7 +24,7 @@ client.once("ready", () => {
     console.log(`Current time in GMT+2: ${currentTime.toISO()}`);
     console.log(`Current hour in GMT+2: ${currentHour}`);
 
-    if (currentHour >= 20 || currentHour < 0) {
+    if (currentHour >= 20 & currentHour < 23) {
       // 20:00 (8 PM) to 00:00 (12 AM) GMT+2
       client.user.setPresence({
         activities: [{ name: "Vedal987", type: ActivityType.Watching }],
