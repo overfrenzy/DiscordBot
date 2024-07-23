@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Client, IntentsBitField, ActivityType } = require("discord.js");
+const { Client, IntentsBitField, ActivityType, Partials } = require("discord.js");
 const mongoose = require("mongoose");
 const eventHandler = require("./handlers/eventHandler");
 const { DateTime } = require("luxon");
@@ -10,7 +10,9 @@ const client = new Client({
     IntentsBitField.Flags.GuildMembers,
     IntentsBitField.Flags.GuildMessages,
     IntentsBitField.Flags.MessageContent,
+    IntentsBitField.Flags.DirectMessages,
   ],
+  partials: [Partials.Channel],
 });
 
 client.once("ready", () => {
@@ -24,7 +26,7 @@ client.once("ready", () => {
     console.log(`Current time in GMT+2: ${currentTime.toISO()}`);
     console.log(`Current hour in GMT+2: ${currentHour}`);
 
-    if (currentHour >= 20 & currentHour < 23) {
+    if (currentHour >= 20 && currentHour < 23) {
       // 20:00 (8 PM) to 00:00 (12 AM) GMT+2
       client.user.setPresence({
         activities: [{ name: "Vedal987", type: ActivityType.Watching }],
