@@ -1,4 +1,8 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  EmbedBuilder,
+} = require("discord.js");
 const Warning = require("../../schemas/warningSchema");
 
 module.exports = {
@@ -37,7 +41,9 @@ module.exports = {
 
     try {
       const targetMember = await interaction.guild.members.fetch(target.id);
-      const botMember = await interaction.guild.members.fetch(interaction.client.user.id);
+      const botMember = await interaction.guild.members.fetch(
+        interaction.client.user.id
+      );
 
       // Check if the bot has the required permissions
       if (!botMember.permissions.has(PermissionFlagsBits.ModerateMembers)) {
@@ -48,7 +54,9 @@ module.exports = {
       }
 
       // Ensure the bot's role is higher than the target's role
-      if (targetMember.roles.highest.position >= botMember.roles.highest.position) {
+      if (
+        targetMember.roles.highest.position >= botMember.roles.highest.position
+      ) {
         return interaction.reply({
           content: `**Insufficient Permissions Notice**\n\nDear ${interaction.member.user.username},\n\nWe regret to inform you that the requested action could not be completed. The target member, ${targetMember.user.username}, holds a position that exceeds the bot's operational permissions. Please consult the hierarchy guidelines to resolve this.\n\nSincerely,\nFrenzyCorp™ Compliance Team\n<:nonono:1264702387004772483>`,
           ephemeral: true,
@@ -126,9 +134,15 @@ module.exports = {
       });
     } catch (error) {
       console.error("Error warning user:", error);
+
+      let errorMessage = "An error occurred while trying to warn the user.";
+      if (error.code === 50007) {
+        errorMessage =
+          "Cannot send messages to this user. They may have DMs disabled or are not accepting messages from bots.";
+      }
+
       await interaction.reply({
-        content:
-          "An error occurred while trying to warn the user.\n<:NOOOO:1264703017752723539>",
+        content: `${errorMessage}\n<:NOOOO:1264703017752723539>`,
         ephemeral: true,
       });
     }

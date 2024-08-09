@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const eventHandler = require("./handlers/eventHandler");
 const { DateTime } = require("luxon");
 
+// Create a new client instance
 const client = new Client({
   intents: [
     IntentsBitField.Flags.Guilds,
@@ -20,7 +21,7 @@ client.once("ready", () => {
 
   // Function to update status based on current time in GMT+2
   const updateStatus = () => {
-    const currentTime = DateTime.now().setZone("Europe/Berlin"); // GMT+2 during Daylight Saving Time (DST)
+    const currentTime = DateTime.now().setZone("Europe/Berlin");
     const currentHour = currentTime.hour;
 
     console.log(`Current time in GMT+2: ${currentTime.toISO()}`);
@@ -29,17 +30,17 @@ client.once("ready", () => {
     if (currentHour >= 20 && currentHour < 23) {
       // 20:00 (8 PM) to 00:00 (12 AM) GMT+2
       client.user.setPresence({
-        activities: [{ name: "Vedal987", type: ActivityType.Watching }],
+        activities: [{ name: "vedal987", type: ActivityType.Watching }],
         status: "online",
       });
-      console.log("Set status to WATCHING Vedal987");
+      console.log("Set status to WATCHING vedal987");
     } else {
       // All other times
       client.user.setPresence({
-        activities: [{ name: "Rachie", type: ActivityType.Listening }],
+        activities: [{ name: "rachie", type: ActivityType.Listening }],
         status: "online",
       });
-      console.log("Set status to LISTENING Rachie");
+      console.log("Set status to LISTENING rachie");
     }
   };
 
@@ -58,6 +59,7 @@ client.once("ready", () => {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log("Connected to DB.");
 
+    // Use the event handler to load and register events
     eventHandler(client);
   } catch (error) {
     console.log(`Error: ${error}`);
@@ -65,3 +67,5 @@ client.once("ready", () => {
 })();
 
 client.login(process.env.TOKEN);
+
+//Since hosting services like SparkedHost dont seem to support running a public HTTP server which is necessary for receiving Twitch webhook events, there is no twitch notification

@@ -37,7 +37,7 @@ for (const file of commandFiles) {
     const commandData = command.data.toJSON();
 
     // Set default permissions for commands
-    if (["warn", "pardon", "purge"].includes(commandData.name)) {
+    if (["warn", "pardon", "purge", "message"].includes(commandData.name)) {
       commandData.default_member_permissions =
         PermissionFlagsBits.ManageMessages.toString();
       commandData.dm_permission = false;
