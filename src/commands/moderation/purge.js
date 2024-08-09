@@ -70,7 +70,6 @@ module.exports = {
       let messagesToDelete;
 
       if (user && !startMessageId && !endMessageId) {
-        // Handle the case where time is set to "all"
         if (time === "all") {
           await askGlobalOrLocal(interaction, user, time); // Ask if the deletion should be global or local
           return;
@@ -121,7 +120,6 @@ module.exports = {
 
       await confirmPurge(interaction, messagesToDelete);
     } catch (error) {
-      console.error("Error during purge execution:", error); // Log the error to the console for debugging
       await interaction.editReply({
         content: "An error occurred while trying to execute the purge command.",
       });
@@ -302,8 +300,129 @@ async function fetchMessagesByUserAndTime(
 
     return allMessages;
   } catch (error) {
-    console.error("Error fetching messages by user and time:", error); // Log any errors that occur during fetching
-    throw error; // Re-throw the error to be handled by the main try-catch block
+    throw error;
+  }
+}
+
+async function fetchMessagesByTime(interaction, time) {
+  try {
+    const channel = interaction.channel;
+    const timeLimit = Date.now() - parseInt(time) * 60000;
+
+    let allMessages = [];
+    let lastMessageId = null;
+
+    while (true) {
+      const options = { limit: 100 };
+      if (lastMessageId) options.before = lastMessageId;
+
+      const fetchedMessages = await channel.messages.fetch(options);
+      if (!fetchedMessages.size) break;
+
+      const filteredMessages = fetchedMessages.filter(
+        (msg) => msg.createdTimestamp >= timeLimit
+      );
+
+      allMessages = allMessages.concat(Array.from(filteredMessages.values()));
+      lastMessageId = fetchedMessages.last()?.id;
+
+      if (filteredMessages.size < 100) break;
+    }
+
+    return allMessages;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function fetchMessagesByRange(interaction, startMessageId, endMessageId) {
+  try {
+    const channel = interaction.channel;
+    const messages = [];
+
+    let lastMessageId = startMessageId;
+
+    while (true) {
+      const options = { limit: 100 };
+      if (lastMessageId) options.after = lastMessageId;
+
+      const fetchedMessages = await channel.messages.fetch(options);
+      if (!fetchedMessages.size) break;
+
+      messages.push(...fetchedMessages.values());
+      lastMessageId = fetchedMessages.last()?.id;
+
+      if (
+        endMessageId &&
+        fetchedMessages.some((msg) => msg.id === endMessageId)
+      ) {
+        break;
+      }
+      if (fetchedMessages.size < 100) break;
+    }
+
+    const filteredMessages = messages.filter(
+      (msg) =>
+        (!endMessageId || msg.id <= endMessageId) && msg.id >= startMessageId
+    );
+
+    // Include the startMessageId message in the deletion
+    const startMessage = await channel.messages.fetch(startMessageId);
+    filteredMessages.unshift(startMessage);
+
+    return filteredMessages;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function fetchMessagesByUserAndRange(
+  interaction,
+  user,
+  startMessageId,
+  endMessageId = null
+) {
+  try {
+    const channel = interaction.channel;
+    const messages = [];
+
+    let lastMessageId = startMessageId;
+
+    while (true) {
+      const options = { limit: 100 };
+      if (lastMessageId) options.after = lastMessageId;
+
+      const fetchedMessages = await channel.messages.fetch(options);
+      if (!fetchedMessages.size) break;
+
+      messages.push(...fetchedMessages.values());
+      lastMessageId = fetchedMessages.last()?.id;
+
+      if (
+        endMessageId &&
+        fetchedMessages.some((msg) => msg.id === endMessageId)
+      ) {
+        break;
+      }
+      if (fetchedMessages.size < 100) break;
+    }
+
+    const filteredMessages = messages.filter(
+      (msg) =>
+        msg.author.id === user.id &&
+        (!endMessageId || msg.id <= endMessageId) &&
+        msg.id >= startMessageId
+    );
+
+    // Include the startMessageId message in the deletion
+    const startMessage = await channel.messages.fetch(startMessageId);
+    if (startMessage.author.id === user.id) {
+      filteredMessages.unshift(startMessage);
+    }
+
+    return filteredMessages;
+  } catch (error) {
+    throw error;
   }
 }
 
